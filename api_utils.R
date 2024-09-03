@@ -19,7 +19,8 @@ get_state_number <- function(state_abbr) {
 }
 
 
-grab_url <- function(state, year, query_code) {
+grab_url <- function(state_abbrv, year, query_code) {
+  state <- get_state_number(state_abbrv)
   url <- paste0("https://api.census.gov/data/",
     year, "/acs/acs1/subject?get=NAME,",
     query_code, "&for=public%20use%20microdata%20area:*&in=state:"
@@ -29,13 +30,14 @@ grab_url <- function(state, year, query_code) {
 }
 
 # Initialize an empty list to store dataframes for each year
-grab_puma_df_by_year <- function(state, year, query_code, fname="") {
+grab_puma_df_by_year <- function(state, year, query_code, fname = "") {
   # Fetch and format data into a df
   url <- grab_url(state, year, query_code)
   api_response <- fromJSON(url)
 
   # Convert the API response to a dataframe
   df <- as.data.frame(api_response[-1, ], stringsAsFactors = FALSE)
+
   colnames(df) <- api_response[1, ] # Set the column names
 
   # Set "public use microdata area" as the row names
@@ -43,6 +45,9 @@ grab_puma_df_by_year <- function(state, year, query_code, fname="") {
 
   # Extract only the S1903_C03_001E column and rename it with the year
   df_year <- df[, query_code, drop = FALSE]
+
+  df_year[, 1] <- as.integer(df_year[, 1]) # Convert the column to integer
+
   colnames(df_year) <- paste0("data_", year)
 
   # Print Year df info of the data
