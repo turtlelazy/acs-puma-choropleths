@@ -67,9 +67,9 @@ plot_puma_map <- function(
 
 }
 
-gather_decade_sf <- function(state,decade_df, fname="", puma_str = "PUMACE10") {
+gather_decade_sf <- function(state, sf,decade_df, fname="", puma_str = "PUMACE10") {
   all_years_data <- list()
-  decade_sf <- get_shapefile(state, 2019)
+  decade_sf <- sf
   decade_df[puma_str] <- rownames(decade_df)
 
   for(year in 2012:2021) {

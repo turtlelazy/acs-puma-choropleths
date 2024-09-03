@@ -9,7 +9,7 @@ get_state_number <- function(state_abbr) {
 
   # Check if the state abbreviation exists in the data
   if (nrow(state_row) == 0) {
-    return(paste("State abbreviation", state_abbr, "not found"))
+    return(FALSE)
   }
 
   # Get the state number and format it with leading zero if necessary
@@ -59,13 +59,17 @@ grab_puma_df_by_year <- function(state, year, query_code, fname = "") {
 }
 
 # Later print a progress bar
-generate_puma_df_decade <- function(state, query_code, fname = "") {
+generate_puma_df_decade <- function(state, query_code_1, query_code_2, fname = "", progress = TRUE) {
   final_df <- NULL
   skips <- c(2020)
+  curr <- 0
+  
+  pb <- if (progress) txtProgressBar(min = 2012, max = 2021, style = 3) else NULL
+  
   for (year in 2012:2021) {
     if (year %in% skips) next
 
-    df_year <- grab_puma_df_by_year(state, year, query_code)
+    df_year <- grab_puma_df_by_year(state, year, if(year>= 2017) query_code_2 else query_code_1)
 
     if (is.null(final_df)) {
       final_df <- df_year
@@ -74,7 +78,10 @@ generate_puma_df_decade <- function(state, query_code, fname = "") {
       rownames(final_df) <- final_df$Row.names # Reassign row names
       final_df$Row.names <- NULL # Remove the auxiliary column
     }
+    if (progress) setTxtProgressBar(pb, year)
   }
+  if (progress) close(pb)
+
   if (fname != "") {
     write.csv(final_df, fname, row.names = TRUE)
   }
