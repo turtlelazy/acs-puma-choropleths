@@ -14,7 +14,7 @@ As a **prerequisite**, you must have R configured and installed (this project wa
 
 Steps:
 
-1. `git clone https://github.com/turtlelazy/money-map.git`
+1. `https://github.com/turtlelazy/acs-puma-choropleths.git`
 2. `cd money-map`
 3. `R`
 4. You should now be in the R console. Proceed with the following
