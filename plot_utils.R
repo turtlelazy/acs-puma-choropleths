@@ -1,4 +1,3 @@
-
 library(sf)
 library(tigris)
 library(ggplot2)
@@ -190,8 +189,8 @@ plot_puma_map_animated <- function(
       panel.background = element_rect(fill = "lightgray", color = NA),
       plot.background = element_rect(fill = "lightblue", color = NA)
     ) +
-    labs(title = "NY PUMA Map",
-        subtitle = paste0("Shading Intensity Based on Data", data_point,"({closest_state})")) +
+    labs(title = title,
+        subtitle = paste0("Shading Intensity Based on ", data_point," ({closest_state})")) +
     transition_states(Year, transition_length = 2, state_length = 1) +
     ease_aes('linear')
 

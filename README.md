@@ -31,3 +31,10 @@ After running that process, you should have an animated gif called `NY_animated_
 * The particular endpoint being used in this project suffers a change in parameter meaning including and after the year 2017. You'll notice that the function `generate_puma_df_decade` in `api_utils.R` has **two** query parameters. This is because the query parameters and their definitions changed. Check the ACS API docs for more information.
 * The shapefiles from tigris are relatively accurate on the state scale, but for cities the quality suffers. For this, you may choose to download and input your own shapefile as input (and the parameters allow you to do so for that reason).
 * Note that the **mean** is used as the middle point on the color scale for the plots, not the median. Up to you to change the scale and colors as you see fit
+
+## More Examples
+
+Generated from `demo.R` script
+
+![CA PUMA Income Map Animation](md_assets/CA_animated_map.gif)
+![TX PUMA Income Map Animation](md_assets/TX_animated_map.gif)
