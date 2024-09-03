@@ -307,6 +307,13 @@
       ],
       "Hash": "44c6a2f8202d5b7e878ea274b1092426"
     },
+    "gifski": {
+      "Package": "gifski",
+      "Version": "1.12.0-2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "94ea43ec9e47684c20810e9272605425"
+    },
     "glue": {
       "Package": "glue",
       "Version": "1.7.0",

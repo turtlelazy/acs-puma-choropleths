@@ -5,6 +5,7 @@ library(ggplot2)
 library(dplyr)
 library(gganimate)
 library(magick)
+library(gifski)
 
 get_shapefile <- function(state, year) {
   # Get the PUMA boundaries for the specified state and year
@@ -22,8 +23,7 @@ plot_puma_map <- function(
 ) {
   # Get the PUMA boundaries for the specified state and year
   # Plot the map with ggplot2
-  data_columns <- df %>%
-    select(starts_with("data_"))
+  data_columns <- df %>% select(starts_with("data_"))
   
   data_values <- unlist(data_columns, use.names = FALSE)
   mean_val <- mean(data_values, na.rm = TRUE)
@@ -77,9 +77,7 @@ gather_decade_sf <- function(state,decade_df, fname="", puma_str = "PUMACE10") {
 
     rownames(decade_df) <- NULL
     data_column <- paste0("data_", year)
-    merged_data <- decade_sf %>% 
-      left_join(decade_df, by = puma_str) %>%
-      mutate(Year = year, data = .data[[data_column]]) 
+    merged_data <- decade_sf %>% left_join(decade_df, by = puma_str) %>% mutate(Year = year, data = .data[[data_column]]) 
     all_years_data[[as.character(year)]] <- merged_data
   }
   return(all_years_data)
@@ -88,56 +86,52 @@ gather_decade_sf <- function(state,decade_df, fname="", puma_str = "PUMACE10") {
 
 plot_puma_map_animated <- function(
   all_years_data,
-  df,
+  decade_df,
   puma_str = "PUMACE10",
   fname = "",
   colors = c("red", "green", "blue"),
+  data_point = "Data",
   label="Data Graph",
-  title="Data Map"
+  title="Data Map" 
 ) 
 {
   # Get the PUMA boundaries for the specified state and year
   # Plot the map with ggplot2
   combined_data <- bind_rows(all_years_data)
 
-  data_columns <- df %>%
-    select(starts_with("data_"))
-  
+  data_columns <- decade_df %>% select(starts_with("data_"))
+
   data_values <- unlist(data_columns, use.names = FALSE)
   mean_val <- mean(data_values, na.rm = TRUE)
   sd_val <- sd(data_values, na.rm = TRUE)
   min_value <- min(data_values)
   max_value <- max(data_values)
 
-  df[puma_str] <- rownames(df)
-  rownames(df) <- NULL
+  decade_df[puma_str] <- rownames(decade_df)
+  rownames(decade_df) <- NULL
 
-  # Create a ggplot object
-  selected_data_column <- paste0("data_", year)
+  # Plot the shapefile with shading intensity
+  # Create the ggplot object
+  p <- ggplot(data = combined_data) + 
+    geom_sf(aes(fill = data), color = "darkblue") +
+    scale_fill_gradientn(
+      colors = c("red", "white", "green"),
+      values = scales::rescale(c(min_value, mean_val, max_value)),
+      na.value = "grey",
+      limits = c(min_value, max_value),
+      name = data_point
+    ) + 
+    theme_void() +
+    theme(
+      panel.background = element_rect(fill = "lightgray", color = NA),
+      plot.background = element_rect(fill = "lightblue", color = NA)
+    ) +
+    labs(title = "NY PUMA Map",
+        subtitle = paste0("Shading Intensity Based on Data", data_point,"({closest_state})")) +
+    transition_states(Year, transition_length = 2, state_length = 1) +
+    ease_aes('linear')
 
-
-    # Plot the shapefile with shading intensity
-# Create the ggplot object
-p <- ggplot(data = combined_data) + 
-  geom_sf(aes(fill = data), color = "darkblue") +
-  scale_fill_gradientn(
-    colors = c("red", "white", "green"),
-    values = scales::rescale(c(min_value, mean_val, max_value)),
-    na.value = "grey",
-    limits = c(min_value, max_value),
-    name = "Data"
-  ) + 
-  theme_void() +
-  theme(
-    panel.background = element_rect(fill = "lightgray", color = NA),
-    plot.background = element_rect(fill = "lightblue", color = NA)
-  ) +
-  labs(title = "NY PUMA Map",
-       subtitle = "Shading Intensity Based on Data ({closest_state})") +
-  transition_states(Year, transition_length = 2, state_length = 1) +
-  ease_aes('linear')
-
-# Animate and save the plot
-anim <- animate(p, nframes = 100, fps = 10, renderer = gifski_renderer("Data_Map_Animation.gif"))
-
+  # Animate and save the plot
+  anim <- animate(p, nframes = 100, fps = 10, renderer = gifski_renderer(fname))
+  return (anim)
 }
