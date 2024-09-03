@@ -7,11 +7,41 @@ library(gganimate)
 library(magick)
 library(gifski)
 
+
+#' Get PUMA Shapefile
+#'
+#' Retrieves the Public Use Microdata Area (PUMA) shapefile for a specified state and year.
+#'
+#' @param state A character string representing the two-letter state abbreviation (e.g., "NY" for New York).
+#' @param year An integer specifying the year for which the PUMA boundaries are needed.
+#'
+#' @return An `sf` object containing the PUMA boundaries for the specified state and year.
+#'
+#' @examples
+#' sf_data <- get_shapefile("NY", 2019)
+#' @export
 get_shapefile <- function(state, year) {
   # Get the PUMA boundaries for the specified state and year
   return(tigris::pumas(state, cb = TRUE, year = year))
 }
 
+#' Plot PUMA Map
+#'
+#' Generates a map of PUMA regions with color shading based on specified data.
+#'
+#' @param sf An `sf` object containing the PUMA shapefile.
+#' @param df A data frame containing the data to be visualized, with columns for each year.
+#' @param puma_str A character string representing the column name that contains PUMA identifiers (default is "PUMACE10").
+#' @param fname A character string specifying the filename to save the plot as an image. If empty, the plot is not saved.
+#' @param colors A vector of colors for the gradient used in the plot (default is c("red", "green", "blue")).
+#' @param label A character string for the plot label (default is "Data Graph").
+#' @param title A character string for the plot title (default is "Data Map").
+#'
+#' @return A ggplot object representing the PUMA map with the specified data.
+#'
+#' @examples
+#' plot_puma_map(sf, df, fname = "puma_map.png")
+#' @export
 plot_puma_map <- function(
   sf,
   df,
@@ -67,6 +97,22 @@ plot_puma_map <- function(
 
 }
 
+#' Gather PUMA Data for a Decade
+#'
+#' Combines PUMA data across multiple years into a single list of `sf` objects.
+#'
+#' @param state A character string representing the two-letter state abbreviation (e.g., "NY" for New York).
+#' @param sf An `sf` object containing the PUMA shapefile.
+#' @param decade_df A data frame containing data for multiple years, with columns named by year (e.g., "data_2019").
+#' @param fname A character string specifying the filename to save the combined data as a CSV file. If empty, the data is not saved.
+#' @param puma_str A character string representing the column name that contains PUMA identifiers (default is "PUMACE10").
+#'
+#' @return A list of `sf` objects, each containing PUMA data for a specific year.
+#'
+#' @examples
+#' all_years_data <- gather_decade_sf("NY", sf, decade_df)
+#' @export
+
 gather_decade_sf <- function(state, sf,decade_df, fname="", puma_str = "PUMACE10") {
   all_years_data <- list()
   decade_sf <- sf
@@ -83,6 +129,24 @@ gather_decade_sf <- function(state, sf,decade_df, fname="", puma_str = "PUMACE10
   return(all_years_data)
 }
 
+#' Plot Animated PUMA Map
+#'
+#' Generates an animated map showing changes in PUMA data across multiple years.
+#'
+#' @param all_years_data A list of `sf` objects containing PUMA data for each year.
+#' @param decade_df A data frame containing data for multiple years, with columns named by year (e.g., "data_2019").
+#' @param puma_str A character string representing the column name that contains PUMA identifiers (default is "PUMACE10").
+#' @param fname A character string specifying the filename to save the animation as a GIF. If empty, the animation is not saved.
+#' @param colors A vector of colors for the gradient used in the animation (default is c("red", "green", "blue")).
+#' @param data_point A character string representing the data label for the animation (default is "Data").
+#' @param label A character string for the animation label (default is "Data Graph").
+#' @param title A character string for the animation title (default is "Data Map").
+#'
+#' @return An animation object (from `gganimate`) showing the PUMA map changing over time.
+#'
+#' @examples
+#' anim <- plot_puma_map_animated(all_years_data, decade_df, fname = "puma_map.gif")
+#' @export
 
 plot_puma_map_animated <- function(
   all_years_data,
